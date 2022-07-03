@@ -1,0 +1,100 @@
+{
+  "main": {
+    "id": "6bba15444ea7f3e7",
+    "type": "split",
+    "children": [
+      {
+        "id": "a19d1775bb796427",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "documentation/about game.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c73417611843093a",
+    "type": "split",
+    "children": [
+      {
+        "id": "84744884876ee2cf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6bda7970ee8b8d91",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "222fb346905a8166",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "c1bcc6138ddfe0a3",
+    "type": "split",
+    "children": [
+      {
+        "id": "6a6e3c751efaebee",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e21c1eed19f8b281",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "documentation/about game.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "a19d1775bb796427",
+  "lastOpenFiles": [
+    "documentation/about game.md",
+    "documentation/main.md",
+    "test/test.md",
+    "unlinked files output.md",
+    "programming languages/python/regular_expression/main.md",
+    "programming languages/external/regular_expression/main.md",
+    "Без названия.md"
+  ]
+}
