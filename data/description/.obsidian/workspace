@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "description/main.md",
+            "file": "description/main window.md",
             "mode": "source",
             "source": false
           }
@@ -69,7 +69,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "description/main.md",
+                "file": "description/main window.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -89,15 +89,15 @@
   },
   "active": "a19d1775bb796427",
   "lastOpenFiles": [
-    "description/main.md",
+    "description/main window.md",
+    "description/about game.md",
+    "description/settings.md",
+    "notes/to do.md",
     "description/purchase of components.md",
-    "description/job search platforms.md",
-    "description/getting a job.md",
-    "documentation/about game.md",
     "documentation/main.md",
-    "test/test.md",
-    "unlinked files output.md",
-    "programming languages/python/regular_expression/main.md",
-    "programming languages/external/regular_expression/main.md"
+    "documentation/about game.md",
+    "description/main.md",
+    "description/job search platforms.md",
+    "description/getting a job.md"
   ]
 }
