@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 public class PlayerInputPC : PlayerInput
 {
@@ -19,6 +19,8 @@ public class PlayerInputPC : PlayerInput
         _inputControler.Enable();
 
         _inputControler.Player.jump.performed += contex => Jump();
+
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
@@ -33,6 +35,8 @@ public class PlayerInputPC : PlayerInput
         {
             move.Invoke(buffer);
         }
+
+         turn.Invoke(Mouse.current.delta.ReadValue());
     }
 
 

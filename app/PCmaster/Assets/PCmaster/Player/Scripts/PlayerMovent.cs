@@ -14,10 +14,22 @@ public class PlayerMovent : MonoBehaviour
     [Space(1.0f)]
     [SerializeField] private float _gravity;
 
-    [SerializeField] private Vector3 _velosity = new();
+    [Space(1.0f)]
+    [SerializeField] private Transform _camera;
+
+    [Header("Rotation settings")]
+    [SerializeField] private float _rotationSensity;
+    [SerializeField] private float _minRotationAngle;
+    [SerializeField] private float _maxRotationAngle;
+
+    private Vector3 _velosity = new();
 
     private CharacterController _characterController;
     private bool _isJumping = false;
+
+    private float _cameraPitch = 0f;
+
+    private bool _isGround = false;
 
     private void Start()
     {
@@ -25,11 +37,12 @@ public class PlayerMovent : MonoBehaviour
 
         _input.move.AddListener(Move);
         _input.jump.AddListener(Jump);
+        _input.turn.AddListener(Turn);
     }
 
     private void FixedUpdate()
     {
-        if (!_characterController.isGrounded)
+        if (!_isGround)
         {
             _velosity.y += _gravity * Time.fixedDeltaTime;
         }
@@ -45,9 +58,23 @@ public class PlayerMovent : MonoBehaviour
         _characterController.Move(_velosity);
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.gameObject.CompareTag("Player"))
+        {
+            _isGround = true;
+            print(other.gameObject.name);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        _isGround = false;
+    }
+
     private void Move(Vector3 direction)
     {
-        if (_characterController.isGrounded)
+        if (_isGround)
         {
             Quaternion t = new(direction.x, direction.y, direction.z, 0);
 
@@ -56,18 +83,28 @@ public class PlayerMovent : MonoBehaviour
 
             direction = new Vector3(t.x, t.y, t.z) * _speed;
 
-            //_characterController.Move(new Vector3(t.x, t.y, t.z) * _speed);
-
             _velosity = new Vector3(direction.x, _velosity.y, direction.z);
         }
     }
 
+
     private void Jump()
     {
-        if (_characterController.isGrounded)
+        if (_isGround)
         {
             _velosity.y = _jumpForce;
             _isJumping = true;
         }
+    }
+
+    private void Turn(Vector2 delta)
+    {
+        transform.Rotate(_rotationSensity * delta.x * Vector3.up);
+
+        _cameraPitch -= delta.y * _rotationSensity;
+
+        _cameraPitch = Mathf.Clamp(_cameraPitch, _maxRotationAngle, _minRotationAngle);
+
+        _camera.localEulerAngles = new Vector3(_cameraPitch, 0, 0);
     }
 }
