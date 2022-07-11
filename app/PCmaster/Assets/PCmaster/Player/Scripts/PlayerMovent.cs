@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovent : MonoBehaviour
 {
     [SerializeField] private PlayerInput _input;
@@ -12,9 +12,6 @@ public class PlayerMovent : MonoBehaviour
     [SerializeField] private float _jumpForce;
 
     [Space(1.0f)]
-    [SerializeField] private float _gravity;
-
-    [Space(1.0f)]
     [SerializeField] private Transform _camera;
 
     [Header("Rotation settings")]
@@ -22,54 +19,42 @@ public class PlayerMovent : MonoBehaviour
     [SerializeField] private float _minRotationAngle;
     [SerializeField] private float _maxRotationAngle;
 
-    private Vector3 _velosity = new();
-
-    private CharacterController _characterController;
-    private bool _isJumping = false;
+    private Rigidbody _rigidbody;
 
     private float _cameraPitch = 0f;
 
     private bool _isGround = false;
 
+    private int _collisonsNumber = 0;
+
     private void Start()
     {
-        _characterController = GetComponent<CharacterController>();
+        _rigidbody = GetComponent<Rigidbody>();
 
         _input.move.AddListener(Move);
         _input.jump.AddListener(Jump);
         _input.turn.AddListener(Turn);
     }
 
-    private void FixedUpdate()
-    {
-        if (!_isGround)
-        {
-            _velosity.y += _gravity * Time.fixedDeltaTime;
-        }
-        else if (!_isJumping)
-        { 
-            _velosity.y = 0;
-        }
-        else
-        {
-            _isJumping = false;
-        }
-
-        _characterController.Move(_velosity);
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (!other.gameObject.CompareTag("Player"))
         {
+            _collisonsNumber++;
             _isGround = true;
-            print(other.gameObject.name);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        _isGround = false;
+        if (!other.gameObject.CompareTag("Player"))
+        {
+            _collisonsNumber--;
+            if (_collisonsNumber == 0)
+            {
+                _isGround = false;
+            }
+        }
     }
 
     private void Move(Vector3 direction)
@@ -83,7 +68,7 @@ public class PlayerMovent : MonoBehaviour
 
             direction = new Vector3(t.x, t.y, t.z) * _speed;
 
-            _velosity = new Vector3(direction.x, _velosity.y, direction.z);
+            _rigidbody.velocity = new Vector3(direction.x, _rigidbody.velocity.y, direction.z);
         }
     }
 
@@ -92,8 +77,7 @@ public class PlayerMovent : MonoBehaviour
     {
         if (_isGround)
         {
-            _velosity.y = _jumpForce;
-            _isJumping = true;
+            _rigidbody.AddForce(_jumpForce * Vector3.up);
         }
     }
 
