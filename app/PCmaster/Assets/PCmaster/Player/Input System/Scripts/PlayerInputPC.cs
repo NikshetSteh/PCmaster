@@ -19,6 +19,7 @@ public class PlayerInputPC : PlayerInput
         _inputControler.Enable();
 
         _inputControler.Player.jump.performed += contex => Jump();
+        _inputControler.Player.click.performed += contex => Click();
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -48,5 +49,10 @@ public class PlayerInputPC : PlayerInput
     private void Jump()
     {
         jump.Invoke();
+    }
+
+    private void Click()
+    {
+        click.Invoke();
     }
 }

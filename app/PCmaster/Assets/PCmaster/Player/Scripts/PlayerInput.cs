@@ -8,4 +8,6 @@ public class PlayerInput : MonoBehaviour
     [HideInInspector] public UnityEvent<Vector3> move = new();
     [HideInInspector] public UnityEvent jump = new();
     [HideInInspector] public UnityEvent<Vector2> turn = new();
+
+    [HideInInspector] public UnityEvent click = new();
 }
