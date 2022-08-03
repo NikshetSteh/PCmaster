@@ -1,31 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerMovent : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerInput _input;
 
-    [Space(1.0f)]
+    [Space]
     [SerializeField] private float _speed;
     [SerializeField] private float _jumpForce;
 
-    [Space(1.0f)]
+    [Space]
     [SerializeField] private Transform _camera;
 
     [Header("Rotation settings")]
-    [SerializeField] private float _rotationSensity;
+    [SerializeField] private float _rotationSensitive;
     [SerializeField] private float _minRotationAngle;
     [SerializeField] private float _maxRotationAngle;
 
     private Rigidbody _rigidbody;
 
-    private float _cameraPitch = 0f;
+    private float _cameraPitch;
 
-    private bool _isGround = false;
+    private bool _isGround;
 
-    private int _collisonsNumber = 0;
+    private int _collisionNumber;
 
     private void Start()
     {
@@ -40,7 +38,7 @@ public class PlayerMovent : MonoBehaviour
     {
         if (!other.gameObject.CompareTag("Player"))
         {
-            _collisonsNumber++;
+            _collisionNumber++;
             _isGround = true;
         }
     }
@@ -49,12 +47,19 @@ public class PlayerMovent : MonoBehaviour
     {
         if (!other.gameObject.CompareTag("Player"))
         {
-            _collisonsNumber--;
-            if (_collisonsNumber == 0)
+            _collisionNumber--;
+            if (_collisionNumber == 0)
             {
                 _isGround = false;
             }
         }
+    }
+
+    private void OnDisable()
+    {
+        _input.move.RemoveListener(Move);
+        _input.jump.RemoveListener(Jump);
+        _input.turn.RemoveListener(Turn);
     }
 
     private void Move(Vector3 direction)
@@ -63,8 +68,9 @@ public class PlayerMovent : MonoBehaviour
         {
             Quaternion t = new(direction.x, direction.y, direction.z, 0);
 
-            t = transform.rotation * t;
-            t *= Quaternion.Inverse(transform.rotation);
+            var rotation = transform.rotation;
+            t = rotation * t;
+            t *= Quaternion.Inverse(rotation);
 
             direction = new Vector3(t.x, t.y, t.z) * _speed;
 
@@ -83,9 +89,9 @@ public class PlayerMovent : MonoBehaviour
 
     private void Turn(Vector2 delta)
     {
-        transform.Rotate(_rotationSensity * delta.x * Vector3.up);
+        transform.Rotate(_rotationSensitive * delta.x * Vector3.up);
 
-        _cameraPitch -= delta.y * _rotationSensity;
+        _cameraPitch -= delta.y * _rotationSensitive;
 
         _cameraPitch = Mathf.Clamp(_cameraPitch, _maxRotationAngle, _minRotationAngle);
 

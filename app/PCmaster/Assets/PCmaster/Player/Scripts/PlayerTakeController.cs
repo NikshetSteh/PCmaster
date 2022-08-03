@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class PlayerTakeController : MonoBehaviour
@@ -13,26 +12,20 @@ public class PlayerTakeController : MonoBehaviour
 
     [Header("Take option")]
     [SerializeField] private float _maxTakeDistance;
-    [SerializeField] private float _maxHoldDIstance;
-    [SerializeField] private float _minHoldDIstance;
+
+    [Space(0.5f)]
+    [SerializeField] private float _maxHoldDistance;
+    [SerializeField] private float _minHoldDistance;
 
     [Header("Taker objects tags")]
-    [SerializeField] private string _PCcomponentTag;
+    [SerializeField] private string _pcComponentTag;
 
-    private bool _hasObjectInHand = false;
-    private GameObject _objectInHand = null;
+    private bool _hasObjectInHand;
+    private GameObject _objectInHand;
 
     private void Awake()
     {
         _input.click.AddListener(OnClick);
-    }
-
-    private void Update()
-    {
-        if (_hasObjectInHand)
-        {
-
-        }
     }
 
     private void OnClick()
@@ -55,7 +48,7 @@ public class PlayerTakeController : MonoBehaviour
 
     private void TakeObject(RaycastHit raycastHit)
     {
-        if (!raycastHit.transform.gameObject.CompareTag(_PCcomponentTag))
+        if (!raycastHit.transform.gameObject.CompareTag(_pcComponentTag))
         {
             return;
         }
@@ -74,12 +67,23 @@ public class PlayerTakeController : MonoBehaviour
 
         _objectInHand.transform.parent = _hand;
 
-        _objectInHand.transform.localPosition = Vector3.forward * _maxHoldDIstance;
+        _objectInHand.transform.localPosition = Vector3.forward * _maxHoldDistance;
     }
 
     private void PutObject(RaycastHit raycastHit)
     {
         //TODO: put to place for component
+        
+        print(raycastHit.transform.gameObject.name);
+
+        if (raycastHit.transform.gameObject.TryGetComponent(typeof(SpaceForComponents), out var component))
+        {
+            print("put into pc");
+            SpaceForComponents spaceForComponents = (SpaceForComponents)component;
+
+            if (spaceForComponents.TrySetComponent(_objectInHand))
+                return;
+        }
 
         _objectInHand.GetComponent<Rigidbody>().isKinematic = false;
         _objectInHand.GetComponent<Rigidbody>().useGravity = true;
@@ -88,5 +92,10 @@ public class PlayerTakeController : MonoBehaviour
 
         _hasObjectInHand = false;
         _objectInHand = null;
+    }
+
+    private void Update()
+    {
+        //TODO make light for space for components when player see to it 
     }
 }

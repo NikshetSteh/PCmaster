@@ -1,58 +1,47 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerInputPC : PlayerInput
 {
-    private PlayerControl _inputControler;
+    private PlayerControl _inputController;
 
-    private bool _isMoving = false;
+    private bool _isMoving;
 
     private void Awake()
     {
-        _inputControler = new PlayerControl();
+        _inputController = new PlayerControl();
     }
 
     private void Start()
     {
-        _inputControler.Enable();
+        _inputController.Enable();
 
-        _inputControler.Player.jump.performed += contex => Jump();
-        _inputControler.Player.click.performed += contex => Click();
+        _inputController.Player.jump.performed += _ => jump.Invoke();
+        _inputController.Player.click.performed += _ => click.Invoke();
 
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void Update()
     {
-        Vector3 buffer = _inputControler.Player.move.ReadValue<Vector3>();
+        Vector3 buffer = _inputController.Player.move.ReadValue<Vector3>();
 
         if (buffer != Vector3.zero)
         {
             move.Invoke(buffer);
             _isMoving = true;
-        }else if (_isMoving)
+        }
+        else if (_isMoving)
         {
             move.Invoke(buffer);
         }
 
-         turn.Invoke(Mouse.current.delta.ReadValue());
+        turn.Invoke(Mouse.current.delta.ReadValue());
     }
 
 
     private void OnDestroy()
     {
-        _inputControler.Disable();
-    }
-
-    private void Jump()
-    {
-        jump.Invoke();
-    }
-
-    private void Click()
-    {
-        click.Invoke();
+        _inputController.Disable();
     }
 }

@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class PCcomponent : MonoBehaviour
+public abstract class PcComponent : MonoBehaviour
 {
-    public enum TYPE_OF_COMPONENT { MOTHER_BOARD, SIDE_CIVER };
+    public enum TypeOfComponent { MotherBoard, SideCover };
 
     public Dictionary<string, string> Options { private set; get; } = new Dictionary<string, string>();
 }

@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PlayerInput : MonoBehaviour
+public abstract class PlayerInput : MonoBehaviour
 {
-    [HideInInspector] public UnityEvent<Vector3> move = new();
-    [HideInInspector] public UnityEvent jump = new();
-    [HideInInspector] public UnityEvent<Vector2> turn = new();
+    public readonly UnityEvent<Vector3> move = new();
+    public readonly UnityEvent jump = new();
+    public readonly UnityEvent<Vector2> turn = new();
 
-    [HideInInspector] public UnityEvent click = new();
+    public readonly UnityEvent click = new();
 }
