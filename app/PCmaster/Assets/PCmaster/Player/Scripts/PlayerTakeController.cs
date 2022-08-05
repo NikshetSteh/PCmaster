@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class PlayerTakeController : MonoBehaviour
@@ -22,6 +21,7 @@ public class PlayerTakeController : MonoBehaviour
 
     private bool _hasObjectInHand;
     private GameObject _objectInHand;
+    private SpaceForComponents _lastObjectInView;
 
     private void Awake()
     {
@@ -68,27 +68,27 @@ public class PlayerTakeController : MonoBehaviour
         _objectInHand.transform.parent = _hand;
 
         _objectInHand.transform.localPosition = Vector3.forward * _maxHoldDistance;
+        
+        //_objectInHand.GetComponent<PcComponent>().take.Invoke();
     }
 
     private void PutObject(RaycastHit raycastHit)
     {
         //TODO: put to place for component
-        
-        print(raycastHit.transform.gameObject.name);
 
-        if (raycastHit.transform.gameObject.TryGetComponent(typeof(SpaceForComponents), out var component))
+        if (raycastHit.collider.gameObject.TryGetComponent(typeof(SpaceForComponents), out var component))
         {
-            print("put into pc");
             SpaceForComponents spaceForComponents = (SpaceForComponents)component;
 
             if (spaceForComponents.TrySetComponent(_objectInHand))
                 return;
         }
+        else
+        {
+            //_objectInHand.GetComponent<PcComponent>().put.Invoke();
 
-        _objectInHand.GetComponent<Rigidbody>().isKinematic = false;
-        _objectInHand.GetComponent<Rigidbody>().useGravity = true;
-
-        _objectInHand.transform.parent = transform.parent;
+            _objectInHand.transform.parent = transform.parent;
+        }
 
         _hasObjectInHand = false;
         _objectInHand = null;
@@ -97,5 +97,39 @@ public class PlayerTakeController : MonoBehaviour
     private void Update()
     {
         //TODO make light for space for components when player see to it 
+        Ray ray = new Ray(_camera.position, _camera.forward);
+        
+        if (Physics.Raycast(ray, out RaycastHit raycastHit))
+        {
+            if (raycastHit.collider.gameObject.CompareTag(Tags.SpaceForComponent))
+            {
+                SpaceForComponents nowLookedObject = raycastHit.collider.gameObject.GetComponent<SpaceForComponents>();
+                
+                if (nowLookedObject != _lastObjectInView && _lastObjectInView)
+                {
+                    nowLookedObject.dontLookToThis.Invoke();
+                    return;
+                }
+
+                _lastObjectInView = nowLookedObject;
+                
+                _lastObjectInView.lookToThis.Invoke();
+            }else
+            {
+                if (_lastObjectInView)
+                {
+                    _lastObjectInView.dontLookToThis.Invoke();
+                    _lastObjectInView = null;
+                }
+            }
+        }
+        else
+        {
+            if (_lastObjectInView)
+            {
+                _lastObjectInView.dontLookToThis.Invoke();
+                _lastObjectInView = null;
+            }
+        }
     }
 }

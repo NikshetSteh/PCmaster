@@ -1,4 +1,4 @@
 public static class Tags
 {
-    public const string SpaceForComponent = "Space For Component";
+    public static readonly string SpaceForComponent = "Space For Component";
 }
