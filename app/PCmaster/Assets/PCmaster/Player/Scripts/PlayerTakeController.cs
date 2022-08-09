@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerTakeController : MonoBehaviour
@@ -7,7 +8,9 @@ public class PlayerTakeController : MonoBehaviour
 
     [Header("Require component")]
     [SerializeField] private Transform _camera;
-    [SerializeField] private Transform _hand;
+    [SerializeField] private Transform _handForPcComponent;
+    [SerializeField] private Transform _handForTool;
+    [SerializeField] private Tool _hand;
 
     [Header("Take option")]
     [SerializeField] private float _maxTakeDistance;
@@ -16,18 +19,15 @@ public class PlayerTakeController : MonoBehaviour
     [SerializeField] private float _maxHoldDistance;
     [SerializeField] private float _minHoldDistance;
 
-    [Header("Taker objects tags")]
-    [SerializeField] private string _pcComponentTag;
-
-    private bool _hasObjectInHand;
     private GameObject _objectInHand;
-    private SpaceForComponents _lastObjectInView;
+    private float _objectInHandDistance;
+    private Tool _nowTool;
 
     private void Awake()
     {
         _input.click.AddListener(OnClick);
+        _input.shift.AddListener(Shift);
     }
-
     private void OnClick()
     {
         Ray ray = new(_camera.position, _camera.forward);
@@ -35,101 +35,145 @@ public class PlayerTakeController : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit raycastHit))
         {
-            if (_hasObjectInHand)
+            if (_objectInHand)
             {
-                PutObject(raycastHit);
+                if (_objectInHand.CompareTag(Tags.PcComponent))
+                {
+                    TryPutObjectIntoPc(raycastHit);
+                    return;
+                }
+
+                if (raycastHit.collider.gameObject.CompareTag(Tags.Fastening) && _objectInHand.CompareTag(Tags.Tool))
+                {
+                    UseTool(raycastHit);
+                    return;
+                }
+
+                PutObject();
             }
             else
             {
+                if (raycastHit.collider.gameObject.CompareTag(Tags.Fastening))
+                {
+                    UseTool(raycastHit);
+                    return;
+                }
+
                 TakeObject(raycastHit);
             }
         }
+        else if(_objectInHand)
+        {
+            PutObject();
+        }
     }
 
+    private void UseTool(RaycastHit raycastHit)
+    {
+        Fastening fastening = raycastHit.collider.gameObject.GetComponent<Fastening>();
+
+        Tool tool = !_objectInHand ? _hand : _objectInHand.GetComponent<Tool>();
+        
+        if (fastening.IsLocked)
+        {
+            if (fastening.TryUnpin(tool))
+            {
+                return;
+            }
+        }
+        else
+        {
+            if (fastening.TryPin(tool))
+            {
+                return;
+            }
+        }
+        
+        PutObject();
+    }
+    
     private void TakeObject(RaycastHit raycastHit)
     {
-        if (!raycastHit.transform.gameObject.CompareTag(_pcComponentTag))
-        {
-            return;
-        }
-
         if (raycastHit.distance > _maxTakeDistance)
         {
             return;
         }
-
-        _hasObjectInHand = true;
-
-        _objectInHand = raycastHit.transform.gameObject;
-
-        _objectInHand.GetComponent<Rigidbody>().isKinematic = true;
-        _objectInHand.GetComponent<Rigidbody>().useGravity = false;
-
-        _objectInHand.transform.parent = _hand;
-
-        _objectInHand.transform.localPosition = Vector3.forward * _maxHoldDistance;
         
-        //_objectInHand.GetComponent<PcComponent>().take.Invoke();
+        if (raycastHit.collider.gameObject.CompareTag(Tags.PcComponent))
+        {
+            TakeComponent(raycastHit);
+            return;
+        }
+
+        if (raycastHit.collider.gameObject.CompareTag(Tags.Tool))
+        {
+            TakeTool(raycastHit);
+        }
     }
 
-    private void PutObject(RaycastHit raycastHit)
+    private void TakeTool(RaycastHit raycastHit)
     {
-        //TODO: put to place for component
+        _objectInHand = raycastHit.collider.gameObject;
 
-        if (raycastHit.collider.gameObject.TryGetComponent(typeof(SpaceForComponents), out var component))
+        _nowTool = _objectInHand.GetComponent<Tool>();
+        
+        _nowTool.Take();
+
+        _objectInHand.transform.parent = _handForTool;
+        _objectInHand.transform.localPosition = new Vector3(0, 0, 0);
+        _objectInHand.transform.localEulerAngles = new Vector3(0, 0, 0);
+    }
+
+    private void TakeComponent(RaycastHit raycastHit)
+    {
+        _objectInHand = raycastHit.collider.gameObject;
+
+        if (!_objectInHand.GetComponent<PcComponent>().TryTake())
         {
-            SpaceForComponents spaceForComponents = (SpaceForComponents)component;
-
-            if (spaceForComponents.TrySetComponent(_objectInHand))
-                return;
+            _objectInHand = null;
+            return;
         }
-        else
-        {
-            //_objectInHand.GetComponent<PcComponent>().put.Invoke();
+        
+        _objectInHand.transform.parent = _handForPcComponent;
 
+        _objectInHand.transform.localPosition = Vector3.forward * _maxHoldDistance;
+    }
+
+    private void TryPutObjectIntoPc(RaycastHit raycastHit)
+    {
             _objectInHand.transform.parent = transform.parent;
-        }
+            if (raycastHit.collider.gameObject.TryGetComponent(typeof(SpaceForComponents), out var component))
+            {
+                SpaceForComponents spaceForComponents = (SpaceForComponents)component;
 
-        _hasObjectInHand = false;
+                if (spaceForComponents.TrySetComponent(_objectInHand))
+                {
+                    _objectInHand = null;
+                    return;
+                }
+            }
+
+            PutObject();
+    }
+
+    private void PutObject()
+    {
+        if (_objectInHand.CompareTag(Tags.PcComponent))
+            _objectInHand.GetComponent<PcComponent>().Put();
+
+        if (_objectInHand.CompareTag(Tags.Tool))
+            _objectInHand.GetComponent<Tool>().Put();
+
+        _objectInHand.transform.parent = transform.parent;
         _objectInHand = null;
     }
 
-    private void Update()
+    private void Shift(float delta)
     {
-        //TODO make light for space for components when player see to it 
-        Ray ray = new Ray(_camera.position, _camera.forward);
+        if (!_objectInHand) return;
         
-        if (Physics.Raycast(ray, out RaycastHit raycastHit))
-        {
-            if (raycastHit.collider.gameObject.CompareTag(Tags.SpaceForComponent))
-            {
-                SpaceForComponents nowLookedObject = raycastHit.collider.gameObject.GetComponent<SpaceForComponents>();
-                
-                if (nowLookedObject != _lastObjectInView && _lastObjectInView)
-                {
-                    nowLookedObject.dontLookToThis.Invoke();
-                    return;
-                }
+        _objectInHandDistance = Math.Clamp(_objectInHandDistance - delta, _minHoldDistance, _maxHoldDistance);
 
-                _lastObjectInView = nowLookedObject;
-                
-                _lastObjectInView.lookToThis.Invoke();
-            }else
-            {
-                if (_lastObjectInView)
-                {
-                    _lastObjectInView.dontLookToThis.Invoke();
-                    _lastObjectInView = null;
-                }
-            }
-        }
-        else
-        {
-            if (_lastObjectInView)
-            {
-                _lastObjectInView.dontLookToThis.Invoke();
-                _lastObjectInView = null;
-            }
-        }
+        _objectInHand.transform.localPosition = new Vector3(0, 0, 1) * _objectInHandDistance;
     }
 }

@@ -36,22 +36,20 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.gameObject.CompareTag("Player"))
-        {
-            _collisionNumber++;
-            _isGround = true;
-        }
+        if (other.gameObject.CompareTag("Player")) return;
+        
+        _collisionNumber++;
+        _isGround = true;
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Player")) return;
+        
+        _collisionNumber--;
+        if (_collisionNumber == 0)
         {
-            _collisionNumber--;
-            if (_collisionNumber == 0)
-            {
-                _isGround = false;
-            }
+            _isGround = false;
         }
     }
 
@@ -64,18 +62,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move(Vector3 direction)
     {
-        if (_isGround)
-        {
-            Quaternion t = new(direction.x, direction.y, direction.z, 0);
+        if (!_isGround) return;
+        
+        Quaternion t = new(direction.x, direction.y, direction.z, 0);
 
-            var rotation = transform.rotation;
-            t = rotation * t;
-            t *= Quaternion.Inverse(rotation);
+        var rotation = transform.rotation;
+        t = rotation * t;
+        t *= Quaternion.Inverse(rotation);
 
-            direction = new Vector3(t.x, t.y, t.z) * _speed;
+        direction = new Vector3(t.x, t.y, t.z) * _speed;
 
-            _rigidbody.velocity = new Vector3(direction.x, _rigidbody.velocity.y, direction.z);
-        }
+        _rigidbody.velocity = new Vector3(direction.x, _rigidbody.velocity.y, direction.z);
     }
 
 

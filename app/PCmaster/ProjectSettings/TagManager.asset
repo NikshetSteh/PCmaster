@@ -6,6 +6,8 @@ TagManager:
   tags:
   - PC Component
   - Space For Component
+  - Fastening
+  - Tool
   layers:
   - Default
   - TransparentFX

@@ -53,6 +53,15 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""shift"",
+                    ""type"": ""Value"",
+                    ""id"": ""a279fcee-7eba-490d-8767-42a0915f006d"",
+                    ""expectedControlType"": ""Analog"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -154,6 +163,17 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
                     ""action"": ""click"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a00b2e3e-d88b-48e0-b150-7ff97d0e6116"",
+                    ""path"": ""<Mouse>/scroll/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""shift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -165,6 +185,7 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
         m_Player_jump = m_Player.FindAction("jump", throwIfNotFound: true);
         m_Player_move = m_Player.FindAction("move", throwIfNotFound: true);
         m_Player_click = m_Player.FindAction("click", throwIfNotFound: true);
+        m_Player_shift = m_Player.FindAction("shift", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -227,6 +248,7 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_jump;
     private readonly InputAction m_Player_move;
     private readonly InputAction m_Player_click;
+    private readonly InputAction m_Player_shift;
     public struct PlayerActions
     {
         private @PlayerControl m_Wrapper;
@@ -234,6 +256,7 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
         public InputAction @jump => m_Wrapper.m_Player_jump;
         public InputAction @move => m_Wrapper.m_Player_move;
         public InputAction @click => m_Wrapper.m_Player_click;
+        public InputAction @shift => m_Wrapper.m_Player_shift;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -252,6 +275,9 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
                 @click.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnClick;
                 @click.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnClick;
                 @click.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnClick;
+                @shift.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShift;
+                @shift.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShift;
+                @shift.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnShift;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -265,6 +291,9 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
                 @click.started += instance.OnClick;
                 @click.performed += instance.OnClick;
                 @click.canceled += instance.OnClick;
+                @shift.started += instance.OnShift;
+                @shift.performed += instance.OnShift;
+                @shift.canceled += instance.OnShift;
             }
         }
     }
@@ -274,5 +303,6 @@ public partial class @PlayerControl : IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
         void OnClick(InputAction.CallbackContext context);
+        void OnShift(InputAction.CallbackContext context);
     }
 }

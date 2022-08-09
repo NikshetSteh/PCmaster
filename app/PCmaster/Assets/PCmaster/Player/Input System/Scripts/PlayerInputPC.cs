@@ -7,6 +7,8 @@ public class PlayerInputPC : PlayerInput
 
     private bool _isMoving;
 
+    private const float MouseScrollSensity = -0.0005f;
+
     private void Awake()
     {
         _inputController = new PlayerControl();
@@ -37,6 +39,8 @@ public class PlayerInputPC : PlayerInput
         }
 
         turn.Invoke(Mouse.current.delta.ReadValue());
+        
+        shift.Invoke(_inputController.Player.shift.ReadValue<float>() * MouseScrollSensity);
     }
 
 
