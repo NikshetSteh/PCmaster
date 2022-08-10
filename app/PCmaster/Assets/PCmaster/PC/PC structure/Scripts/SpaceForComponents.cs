@@ -5,6 +5,21 @@ using UnityEngine.Events;
 
 public class SpaceForComponents : MonoBehaviour
 {
+    public enum ErrorSetPcComponents
+    {
+        ComponentTypesDontMatch,
+        ComponentIsPinned,
+        ThisComponentDoesntFitHere,
+        ThisSpaceIsFull,
+        Null
+    }
+
+    public enum ErrorRemovePcComponents
+    {
+        ComponentIsPinned,
+        Null
+    }
+
     [Serializable]
     public class OptionsRequirement
     {
@@ -20,8 +35,8 @@ public class SpaceForComponents : MonoBehaviour
         {
             if (option.Name != _name)
                 throw new Exception("PcComponent option name is not name of option requirement");
-            
-            if(option.IsInt != _isInt)
+
+            if (option.IsInt != _isInt)
                 throw new Exception("PcComponent type is not type of option requirement");
 
             if (_isInt)
@@ -35,25 +50,25 @@ public class SpaceForComponents : MonoBehaviour
         }
     }
 
-    [Header("Component data")]
-    [SerializeField] private OptionsRequirement[] _minOptionsRequirements; // option for component can be state to this space(NOT work!)
+    [Header("Component data")] [SerializeField]
+    private OptionsRequirement[] _minOptionsRequirements; // option for component can be state to this space(NOT work!)
 
     [SerializeField] private PcComponent.TypeOfComponent _typeOfComponent;
-    
+
     [SerializeField] private PcComponent _autoFull;
 
-    [Header("Requirement components")]
-    [SerializeField] private Collider _collider;
+    [Header("Requirement components")] [SerializeField]
+    private Collider _collider;
+
     [SerializeField] private Rigidbody _rigidbodyOfPc;
     [SerializeField] private MeshRenderer _meshRenderer;
-    
-    [Space]
-    [SerializeField] private Fastening[] _fastenings;
-    
+
+    [Space] [SerializeField] private Fastening[] _fastenings;
+
     public readonly UnityEvent lookToThis = new UnityEvent();
     public readonly UnityEvent dontLookToThis = new UnityEvent();
     public bool IsFull { private set; get; }
-    
+
     public readonly UnityEvent<PcComponent> setNewComponent = new UnityEvent<PcComponent>();
     public readonly UnityEvent<PcComponent> removeComponent = new UnityEvent<PcComponent>();
 
@@ -70,53 +85,53 @@ public class SpaceForComponents : MonoBehaviour
     {
         if (_autoFull)
         {
-            if (!TrySetComponent(_autoFull.gameObject))
+            if (TrySetComponent(_autoFull.gameObject) != ErrorSetPcComponents.Null)
             {
                 Debug.LogError("PcComponent is cannot be state(auto full)", this);
             }
         }
     }
 
-    public bool TryRemoveNowComponent()
+    public ErrorRemovePcComponents TryRemoveNowComponent()
     {
         if (CheckFastening())
         {
-            return false;
+            return ErrorRemovePcComponents.ComponentIsPinned;
         }
-        
+
         _nowComponent.gameObject.transform.parent = transform.root;
 
         _collider.enabled = true;
-        
+
         IsFull = false;
-        
+
         removeComponent.Invoke(_nowComponent.GetComponent<PcComponent>());
-        
+
         DisconnectedComponent();
 
-        return true;
+        return ErrorRemovePcComponents.Null;
     }
 
-    public bool TrySetComponent(GameObject component)
+    public ErrorSetPcComponents TrySetComponent(GameObject component)
     {
         PcComponent pcComponent = component.GetComponent<PcComponent>();
-        
+
         if (IsFull)
-            return false;
+            return ErrorSetPcComponents.ThisSpaceIsFull;
 
         if (CheckFastening())
         {
-            return false;
+            return ErrorSetPcComponents.ComponentIsPinned;
         }
 
         if (pcComponent.Type != _typeOfComponent)
         {
-            return false;
+            return ErrorSetPcComponents.ComponentTypesDontMatch;
         }
 
         if (_minOptionsRequirements.Any(i => !i.Test(pcComponent.GetOptions()[i.Name])))
         {
-            return false;
+            return ErrorSetPcComponents.ThisComponentDoesntFitHere;
         }
 
         _nowComponent = component;
@@ -129,12 +144,12 @@ public class SpaceForComponents : MonoBehaviour
 
         _meshRenderer.enabled = false;
         _collider.enabled = false;
-        
+
         setNewComponent.Invoke(_nowComponent.GetComponent<PcComponent>());
-        
+
         ConnectComponent(component.gameObject.GetComponent<Rigidbody>());
-        
-        return true;
+
+        return ErrorSetPcComponents.Null;
     }
 
     private bool CheckFastening()
@@ -161,6 +176,7 @@ public class SpaceForComponents : MonoBehaviour
         {
             return;
         }
+
         _meshRenderer.enabled = true;
     }
 

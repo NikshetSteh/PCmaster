@@ -128,8 +128,11 @@ public class PlayerTakeController : MonoBehaviour
     {
         _objectInHand = raycastHit.collider.gameObject;
 
-        if (!_objectInHand.GetComponent<PcComponent>().TryTake())
+        SpaceForComponents.ErrorRemovePcComponents error = _objectInHand.GetComponent<PcComponent>().TryTake(); 
+        
+        if (error != SpaceForComponents.ErrorRemovePcComponents.Null)
         {
+            print(error.ToString());
             _objectInHand = null;
             return;
         }
@@ -146,10 +149,16 @@ public class PlayerTakeController : MonoBehaviour
             {
                 SpaceForComponents spaceForComponents = (SpaceForComponents)component;
 
-                if (spaceForComponents.TrySetComponent(_objectInHand))
+                SpaceForComponents.ErrorSetPcComponents error = spaceForComponents.TrySetComponent(_objectInHand);
+                
+                if (error == SpaceForComponents.ErrorSetPcComponents.Null)
                 {
                     _objectInHand = null;
                     return;
+                }
+                else
+                {
+                    print(error.ToString());
                 }
             }
 

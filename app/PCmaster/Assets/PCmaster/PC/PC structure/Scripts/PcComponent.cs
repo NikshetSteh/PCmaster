@@ -56,19 +56,27 @@ public class PcComponent : MonoBehaviour
         return _optionsDict;
     }
     
-    public bool TryTake()
+    public SpaceForComponents.ErrorRemovePcComponents TryTake()
     {
         if (_nowSpaceForComponents)
         {
-            if (!_nowSpaceForComponents.TryRemoveNowComponent())
+            SpaceForComponents.ErrorRemovePcComponents error = _nowSpaceForComponents.TryRemoveNowComponent();
+            
+            if (error == SpaceForComponents.ErrorRemovePcComponents.Null)
             {
-                return false;
+                Take();
+                
+                return SpaceForComponents.ErrorRemovePcComponents.Null;
+            }
+            else
+            {
+                return error;
             }
         }
 
         Take();
 
-        return true;
+        return SpaceForComponents.ErrorRemovePcComponents.Null;
     }
 
     public void Put()
